@@ -1,0 +1,35 @@
+services:
+  pg_db:
+    image: bitnami/postgresql:17
+    container_name: postgresql
+    ports:
+      - 5432:5432
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 12342234
+      POSTGRES_DB: fb_challenge
+  
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    container_name: spring_api
+    ports:
+      - 8080:8080
+    depends_on:
+      pg_db:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://pg_db:5432/fb_challenge
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: 12342234
+
+volumes:
+  pgdata:
