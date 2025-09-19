@@ -1,6 +1,8 @@
 package com.fb_challenge.api.user.infrastructure.repository;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Repository;
@@ -9,7 +11,6 @@ import com.fb_challenge.api.shared.infrastructure.database.jpa.UserJPA;
 import com.fb_challenge.api.shared.infrastructure.database.repository.JpaUserRepository;
 import com.fb_challenge.api.user.domain.entity.User;
 import com.fb_challenge.api.user.domain.repository.UserRepository;
-import com.fb_challenge.api.user.infrastructure.exception.InfrastructureException;
 import com.fb_challenge.api.user.infrastructure.mapper.InfrastructureMapper;
 
 @Repository
@@ -30,12 +31,28 @@ public class UserRepositoryImpl implements UserRepository {
 
     @Override
     public User save(User user) {
-        try {
-            UserJPA userJPA = this.jpaUserRepository.saveAndFlush(InfrastructureMapper.toJpa(user));
-            return InfrastructureMapper.toDomain(userJPA);
-        } catch(Exception e) {
-            throw new InfrastructureException("Fail to save the user", e);
-        }
+        UserJPA userJPA = this.jpaUserRepository.saveAndFlush(InfrastructureMapper.toJpa(user));
+        return InfrastructureMapper.toDomain(userJPA);
     }
+
+	@Override
+	public Optional<User> findById(UUID id) {
+		return this.jpaUserRepository.findById(id).map(InfrastructureMapper::toDomain);
+	}
+
+	@Override
+	public boolean existsByEmail(String email) {
+		return this.jpaUserRepository.existsByEmail(email);
+	}
+
+	@Override
+	public boolean existsByCpf(String cpf) {
+	    return this.jpaUserRepository.existsByCpf(cpf);
+	}
+
+	@Override
+	public void delete(UUID id) {
+		this.jpaUserRepository.deleteById(id);
+	}
     
 }
